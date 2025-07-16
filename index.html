@@ -136,11 +136,11 @@
     <label for="month">Month</label>
     <input type="month" id="month" required>
 
-    <label for="half">Half</label>
+    <label for="half">Stock</label>
     <select id="half" name="half" required>
     <option value="">--Select--</option>
-    <option value="first">First Half</option>
-    <option value="second">Second Half</option>
+    <option value="First Half">First Half</option>
+    <option value="Full Month">Full Month</option>
     </select>
 
     <div id="stockSection" style="display:none;">
@@ -152,7 +152,7 @@
             <th>ITEM</th>
             <th>TGT</th>
             <th>Opening</th>
-            <th>Purchase</th>
+            <th>Closing</th>
             <th>Sales</th>
             <th>Commitment</th>
           </tr>
@@ -226,8 +226,8 @@
 
   passwordInput.oninput = () => {
     const actualPassword = dbData?.[stateSel.value]?.[ssSel.value]?.[dbSel.value]?.password;
-    //if (String(passwordInput.value) === String(actualPassword)) {
-    if (1 === 1) {
+    if (String(passwordInput.value) === String(actualPassword)) {
+    // if (1 === 1) {
       renderStockTable();
       stockSection.style.display = 'block';
       checkInputs();
@@ -247,7 +247,7 @@
         <td>${ITEM}</td>
         <td><input type="text" class="TGT" /></td>
         <td><input type="text" class="opening" /></td>
-        <td><input type="text" class="purchase" /></td>
+        <td><input type="text" class="Closing" /></td>
         <td><input type="text" class="sales" /></td>
         <td><input type="text" class="Commitment" /></td>
         
@@ -277,22 +277,23 @@
       SS_Name: ssSel.value,
       DB_Name: dbSel.value,
       Month: document.getElementById('month').value,
+      Stock : document.getElementById('half').value,
       stocks: []
     };
 
     const rows = stockTableBody.querySelectorAll('tr');
     rows.forEach(row => {
       const [Sr_No, Category, item] = row.querySelectorAll('td');
-      const [TGT,open, purchase,sales,Commitment] = row.querySelectorAll('input');
+      const [TGT,open, Closing,sales,Commitment] = row.querySelectorAll('input');
 
-      if (open.value.trim() || purchase.value.trim()|| sales.value.trim() || TGT.value.trim() || Commitment.value.trim()) {
+      if (open.value.trim() || Closing.value.trim()|| sales.value.trim() || TGT.value.trim() || Commitment.value.trim()) {
         formData.stocks.push({
           Sr_No: Sr_No.textContent,
           Category: Category.textContent,
           Item: item.textContent,
           TGT: TGT.value.trim(),
           Opening: open.value.trim(),
-          Purchase: purchase.value.trim(),
+          Closing: Closing.value.trim(),
           Sales: sales.value.trim(),
           Commitment: Commitment.value.trim(),
           
@@ -301,7 +302,7 @@
     });
 
     try {
-      const res = await fetch('', {
+      const res = await fetch('https://script.google.com/macros/s/AKfycbxp3fVGd9Ql3uZZgHujmPu6FhGIsVt1GlUbngtQaJrFd1l38PJiFD_wMQ4hJV-ux8fw/exec', {
         method: 'POST',
         body: JSON.stringify(formData)
       });
@@ -323,9 +324,9 @@
 function downloadCSV(formData) {
   let csvContent = `State,SS Name,DB Name,Month\n"${formData.State}","${formData.SS_Name}","${formData.DB_Name}","${formData.Month}"\n\n`;
 
-  csvContent += `Category,Item,MRP,Opening,Purchase,Sales\n`;
+  csvContent += `Category,Item,Sr_No,TGT,Opening,Closing,Sales,Commitments\n`;
   formData.stocks.forEach(stock => {
-    csvContent += `"${stock.Category}","${stock.Item}",${stock.Mrp},"${stock.Opening}","${stock.Purchase}","${stock.Sales}"\n`;
+    csvContent += `"${stock.Category}","${stock.Item}",${stock.Sr_No},"${stock.TGT}","${stock.Opening}","${stock.Closing}","${stock.Sales}","${stock.Commitment}"\n`;
   });
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
